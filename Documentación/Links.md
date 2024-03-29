@@ -1,5 +1,8 @@
 //Diseño 
 
+[![Alt text](https://img.youtube.com/vi/EcmxOMBsX7A&t=459s/0.jpg)](https://www.youtube.com/watch?v=EcmxOMBsX7A&t=459s)
+[![Alt text](https://img.youtube.com/vi/R29G3hUiZnU&t=1s/0.jpg)](https://www.youtube.com/watch?v=R29G3hUiZnU&t=1s)
+
 //Electrónica
 
 //Programacion y control 
