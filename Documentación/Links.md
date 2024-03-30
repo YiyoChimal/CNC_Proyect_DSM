@@ -34,3 +34,9 @@ http://elprofegarcia.com/sample-page/
 [![Alt text](https://img.youtube.com/vi/uQZnICIlmiE/0.jpg)](https://www.youtube.com/watch?v=uQZnICIlmiE)
 
 [![Alt text](https://img.youtube.com/vi/doK9qD1zDFs/0.jpg)](https://www.youtube.com/watch?v=doK9qD1zDFs)
+
+Apuntadores en C++:
+https://www.youtube.com/watch?v=tbVHbfIVxs4&t=554s
+
+Poo en C++: 
+https://www.youtube.com/watch?v=bXLBrXEZBus
