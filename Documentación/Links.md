@@ -18,6 +18,9 @@ https://reprap.org/wiki/Arduino_GCode_Interpreter
 Vectorizar una imagen y codigo g: 
 https://www.youtube.com/watch?v=1Vkq4rFA8oc&list=PLnwu2s7SIakR-0Gs5vAO_1sfWDOy9mBE0&index=9
 
+Configuaracón de medidas: 
+https://www.youtube.com/watch?v=hZNDwzectrE&list=PLnwu2s7SIakR-0Gs5vAO_1sfWDOy9mBE0&index=10
+
 //Programacion y control 
 
 [![Alt text](https://img.youtube.com/vi/uQZnICIlmiE/0.jpg)](https://www.youtube.com/watch?v=uQZnICIlmiE)
