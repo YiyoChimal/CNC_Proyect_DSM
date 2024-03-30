@@ -5,6 +5,7 @@
 [![Alt text](https://img.youtube.com/vi/R29G3hUiZnU&t=1s/0.jpg)](https://www.youtube.com/watch?v=R29G3hUiZnU&t=1s)
 
 //Electrónica
+https://www.luisllamas.es/motores-paso-paso-arduino-driver-a4988-drv8825/
 
 //Programacion y control 
 uQZnICIlmiE
