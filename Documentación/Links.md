@@ -3,6 +3,7 @@
 
 Diseño principal:
 https://www.youtube.com/watch?v=EcmxOMBsX7A&t=461s
+![image](https://github.com/YiyoChimal/CNC_Proyect_DSM/assets/165099057/7ecd5d3b-8bc9-4ae2-a322-bc0d2c2c072a)
 
 https://www.youtube.com/watch?v=R29G3hUiZnU&t=1s
 
