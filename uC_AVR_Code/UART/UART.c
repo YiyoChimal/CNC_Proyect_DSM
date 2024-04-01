@@ -61,35 +61,14 @@ void escribeFlAChar(float num, char ndecimal){
 	escribeSerial(dbuffer);
 }
 
-char ComandoStr[20];
-volatile unsigned char RxContador=0;  
-char rx='\0'; 
 
-ISR(USART_RX_vect){
-	rx= UDR0;
-	
-	if (rx==10)
-	{
-		ComandoStr[RxContador]='\0'; 
-		RxContador=0;
-		if (strstr(ComandoStr,"a on"))
-		{
-			
-		}else if (strstr(ComandoStr,"b on"))
-		{
-		}
-		
-		
-	}else{
-		ComandoStr[RxContador++]=rx;	
-	}
-	
-	
-}
 
-char resibeSerial(){	
-	char *Cadena= ComandoStr; 
-	while(*Cadena) return *Cadena++; 
-}
+
+
+//char resibeSerial(){	
+	//char *Cadena= ComandoStr; 
+	//while(*Cadena) return *Cadena++; 
+//}
+
 
 
