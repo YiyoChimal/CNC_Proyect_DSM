@@ -21,7 +21,7 @@
 #define BRC ((F_CPU/16/BAUD)-1) //Formula para modo normal asincrono 
 
 
-void initserial(); //Inicialización
+void initserial(); //InicializaciÃ³n
 void anexaSerial(int dato);  //Anexa las cadenas de datos
 void saltoLinea(); //Salto de linea 
 void escribeSerial(char *str); //Envia una cadena de datos
