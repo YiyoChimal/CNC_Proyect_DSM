@@ -27,7 +27,7 @@ void saltoLinea(); //Salto de linea
 void escribeSerial(char *str); //Envia una cadena de datos
 void escribeNumAChar(int num); //Envia un dato de tipo entero
 void escribeFlAChar(float num, char ndecimal); //Envia un dato de tipo float 
-char resibeSerial(); 
+char resibeSerial(void); 
 
 
 #endif /* UART_H_ */
