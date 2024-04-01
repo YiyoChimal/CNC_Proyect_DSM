@@ -12,7 +12,10 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <string.h>
-char string[20]; 
+
+char ComandoStr[20];
+volatile unsigned char RxContador=0;
+char rx='\0';
 
 
 int main(void)
@@ -25,20 +28,24 @@ int main(void)
 	
     while (1) 
     {
-	
-
-	
-	
-		if (strstr(ComandoStr,"a on"))
-		{
-			PORTC|=(1<<PINC0);
-			PORTC&= ~(1<<PINC1)|(1<<PINC2);
-		}else if (strstr(ComandoStr,"b on")){
-			PORTC|=(1<<PINC1);
-			PORTC&= ~(1<<PINC0)|(1<<PINC2);
-		}
-		
 		
     }
+}
+
+
+
+ISR(USART_RX_vect){
+	rx= UDR0;
+	
+	
+	if (rx==''){
+		ComandoStr[RxContador]='\0';
+		RxContador=0;
+		if (strstr(ComandoStr,"a on")){PORTC|=(1<<PINC0);PORTC&= ~(1<<PINC1)|(1<<PINC2);
+		}else if (strstr(ComandoStr,"b on")){ PORTC|=(1<<PINC1); PORTC&= ~(1<<PINC0)|(1<<PINC2);}
+		
+	}else{ComandoStr[RxContador++]=rx;}
+	
+	
 }
 
