@@ -11,7 +11,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-
+#include <string.h>
+char string[20]; 
 
 
 int main(void)
@@ -24,12 +25,15 @@ int main(void)
 	
     while (1) 
     {
-		
-		if (resibeSerial()=='a')
+	
+
+	
+	
+		if (strstr(ComandoStr,"a on"))
 		{
 			PORTC|=(1<<PINC0);
 			PORTC&= ~(1<<PINC1)|(1<<PINC2);
-		}else if (resibeSerial()=='b'){
+		}else if (strstr(ComandoStr,"b on")){
 			PORTC|=(1<<PINC1);
 			PORTC&= ~(1<<PINC0)|(1<<PINC2);
 		}
@@ -37,6 +41,4 @@ int main(void)
 		
     }
 }
-
-
 
