@@ -13,14 +13,14 @@
 #include <math.h>
 #include <avr/interrupt.h>
 
-char rx='\0'; 
+
 
 
 void initserial(){
-	UBRR0H = (BRC>>8); //Configuraci髇 la velocidad de transmisi髇 
+	UBRR0H = (BRC>>8); //Configuraci贸n la velocidad de transmisi贸n 
 	UBRR0L = BRC;
-	UCSR0B |= ((1<<TXEN0)|(1<<RXEN0)|(1<<RXCIE0)); //Habilita la transmisi髇 y recepcci髇, asi como la interrupci髇 para recepci髇
-	UCSR0C |=  ((1<<UCSZ00)|(1<<UCSZ01)); // Tama駉 de palabra 8 bits, comunicaci髇 asincrona, paridad desactivada, modo asyncrono
+	UCSR0B |= ((1<<TXEN0)|(1<<RXEN0)|(1<<RXCIE0)); //Habilita la transmisi贸n y recepcci贸n, asi como la interrupci贸n para recepci贸n
+	UCSR0C |=  ((1<<UCSZ00)|(1<<UCSZ01)); // Tama帽o de palabra 8 bits, comunicaci贸n asincrona, paridad desactivada, modo asyncrono
 }
 
 void anexaSerial(int dato){
@@ -61,15 +61,34 @@ void escribeFlAChar(float num, char ndecimal){
 	escribeSerial(dbuffer);
 }
 
+char ComandoStr[20]='\n';
+volatile unsigned char RxContador=0;  
+char rx='\0'; 
+
 ISR(USART_RX_vect){
 	rx= UDR0;
-	//char comandostr[]
+	
+	if (rx==10)
+	{
+		ComandoStr[RxContador]='\0'; 
+		RxContador=0;
+		if (strstr(ComandoStr,"a on"))
+		{
+			
+		}else if (strstr(ComandoStr,"b on"))
+		{
+		}
+		
+		
+	}else{
+		ComandoStr[RxContador]=rx;	
+	}
+	
+	
 }
 
 char resibeSerial(){
 	return rx;
 }
-
-
 
 
