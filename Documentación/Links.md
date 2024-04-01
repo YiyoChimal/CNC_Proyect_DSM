@@ -31,6 +31,9 @@ http://elprofegarcia.com/sample-page/
 
 ## Programacion y control 
 
+Timers: 
+https://www.youtube.com/watch?v=uQZnICIlmiE&t=1s
+
 Apuntadores en C++:
 https://www.youtube.com/watch?v=tbVHbfIVxs4&t=554s
 
@@ -39,3 +42,6 @@ https://www.youtube.com/watch?v=bXLBrXEZBus
 
 Transformar texto a codigo G: 
 https://www.youtube.com/watch?v=tdQYNH1OhDE&list=PLqNYqBJXVWTTmlC0MAklvn9M82sbkwHm2&index=2
+
+Comunicación serial matlab a micro: 
+https://www.youtube.com/watch?v=xQLa8d0V5lg
