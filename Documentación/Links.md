@@ -40,3 +40,6 @@ https://www.youtube.com/watch?v=tbVHbfIVxs4&t=554s
 
 Poo en C++: 
 https://www.youtube.com/watch?v=bXLBrXEZBus
+
+Transformar texto a codigo G: 
+https://www.youtube.com/watch?v=tdQYNH1OhDE&list=PLqNYqBJXVWTTmlC0MAklvn9M82sbkwHm2&index=2
