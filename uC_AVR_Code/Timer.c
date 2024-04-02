@@ -40,7 +40,7 @@ The maxumun time is 3 us
 	 OCR1A = (16000000 /div1a/Fclk1a) - 1;
 	
 	//Compare value Timer 1b
-	 OCR1A =(16000000 /div1b/Fclk1b) - 1; 
+	 OCR1B =(16000000 /div1b/Fclk1b) - 1; 
 	
 	 //enable interrupt 1a
 	 TIMSK1 |= (1<<OCIE1A);
