@@ -22,11 +22,12 @@ The maxumun time is 3 us
 
  #include "TIMER.h"
  #define Fclk1a 200000
- #define div1a 8
+
  
  #define Fclk1b 200000
- #define div1b 8
  
+ #define div1 8
+  
  //Timer 1a
  void timer1_init(){
 	 
@@ -37,16 +38,16 @@ The maxumun time is 3 us
 	 TCCR1B &=~ (1<<WGM13);
 	 
 	 //Compare value Timer 1a
-	 OCR1A = (16000000 /div1a/Fclk1a) - 1;
+	 OCR1A = (16000000 /div1/Fclk1a) - 1;
 	
 	//Compare value Timer 1b
-	 OCR1B =(16000000 /div1b/Fclk1b) - 1; 
+	 OCR1B =(16000000 /div1/Fclk1b) - 1; 
 	
 	 //enable interrupt 1a
 	 TIMSK1 |= (1<<OCIE1A);
 	 
-	 //enable interrupt 1b
-	 TIMSK1 |= (1<<OCIE1B);
+	 ////enable interrupt 1b //Causa error para si no se aplica la interrupción
+	// TIMSK1 |= (1<<OCIE1B);
  }
 
  void timer1_on(){
@@ -54,7 +55,7 @@ The maxumun time is 3 us
 TCNT1 = 0x0000;
 
 
-switch (div1a) {
+switch (div1) {
 	case 1:   TCCR1B |= (1<<CS10); TCCR1B &=~ (1<<CS11); TCCR1B &=~ (1<<CS12); break;
 	case 8:	  TCCR1B &=~(1<<CS10); TCCR1B |=  (1<<CS11); TCCR1B &=~ (1<<CS12); break;
 	case 64:  TCCR1B |=  (1<<CS11); TCCR1B |=  (1<<CS11); TCCR1B &=~ (1<<CS12); break;
