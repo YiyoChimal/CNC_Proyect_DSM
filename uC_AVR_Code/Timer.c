@@ -46,7 +46,7 @@ The maxumun time is 3 us
 	 //enable interrupt 1a
 	 TIMSK1 |= (1<<OCIE1A);
 	 
-	 ////enable interrupt 1b //Causa error para si no se aplica la interrupciÃ³n
+	 ////enable interrupt 1b //Causa error para si no se aplica la interrupción
 	// TIMSK1 |= (1<<OCIE1B);
  }
 
