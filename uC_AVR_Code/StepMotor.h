@@ -19,14 +19,18 @@ typedef struct{
 	float Rps; //Rps=Revolución por segundo
 	float Fm; //Frecuancia de motor o St
 	float Tm; //Periodo motores
-	float Vl; //Velosidad lineal
+	float Vl; //Velosidad linea
+	//Movimiento
+	float DeltaT; 
+	float TDT; 
+	float SDT; 
 	
 	//void (*Init)(struct GeneralMotor *Datos); //Nombre de la función, datos a dar en la funcion en ester cadao la estructura
 	
 	
 	}GeneralMotor;
 
-	void CNC_Init(GeneralMotor *Datos,float RPM,float Sr,float Rs); 
+	void CNC_Init(GeneralMotor *Datos,float RPM,float Sr,float Rs,float Tt); 
 
 
 	typedef struct{
@@ -42,11 +46,13 @@ typedef struct{
 		float Deltan; //Delta de la distancia recorrida por el motor n;
 		float TDn; //Timpo de la delta
 		float SDn;  //Pasos de la delta
-		
+		float GDn; //Contante de delta 
+		volatile unsigned int CountF; //Contador para la frecuencia 
+		volatile unsigned int CountS; //Contador para los Pasos 
 		
 	}AxisMotor;
 
-	void Axis_Set(AxisMotor *Datos1, GeneralMotor *Datos2);
+	
 
 #endif /* GENERALMOTOR_H_ */
 
