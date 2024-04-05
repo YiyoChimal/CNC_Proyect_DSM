@@ -25,6 +25,8 @@ typedef struct{
 	float TDT;  //Tiempo en recorrer la delta 
 	float SDT; //Pasos para recorrer la delta 
 	unsigned int MT; //Modificador del periodo
+	volatile unsigned int CountT1; //Contador para el periodo uno
+	volatile unsigned int CountT2; //Contador para el periodo uno
 	volatile unsigned char OneShot; //Contador de un disparo
 	volatile unsigned char OneShotDir; 
 	//void (*Init)(struct GeneralMotor *Datos); //Nombre de la función, datos a dar en la funcion en ester cadao la estructura
@@ -49,7 +51,7 @@ typedef struct{
 		float TDn; //Timpo de la delta
 		unsigned int SDn;  //Pasos de la delta
 		float GDn; //Contante de delta 
-		volatile unsigned int CountT; //Contador para el periodo
+		//volatile unsigned int CountT; //Contador para el periodo
 		volatile unsigned int CountS; //Contador para los Pasos 
 		
 	}AxisMotor;

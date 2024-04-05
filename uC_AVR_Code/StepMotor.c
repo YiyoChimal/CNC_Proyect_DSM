@@ -17,9 +17,9 @@ void CNC_Init(GeneralMotor *Datos,int RPM, int Sr, int Rs,unsigned int Tt){
 	//Caracteristicas para Cada motor Mx,My,Mz
 	Datos->Rps=RPM/60; //Rps=Revolución por segundo
 	Datos->Fm=Datos->Rps*Sr; //Frecuancia de motor o St
-	Datos->Tm=1/Datos->Fm; //Periodo motores
-	Datos->MT=(Tt/2000); //Modificador de periodo
-	Datos->Tm=(Datos->Tm)/Datos->MT; 	//Periodo modificado 
+	Datos->Tm=(1/(Datos->Fm))*1000; //Periodo motores *1000
+	Datos->MT=(Tt/1000); //Modificador de periodo
+	Datos->Tm=((Datos->Tm)/Datos->MT)-2; 	//Periodo modificado 
 	Datos->Vl=Datos->Fm*Datos->Dp; //Velosidad lineal
 	
 }
