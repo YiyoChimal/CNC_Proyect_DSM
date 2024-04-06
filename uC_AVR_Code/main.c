@@ -49,8 +49,7 @@ volatile unsigned int count0=0,count1=0;
  #define Rs 8//Distancia por vuelta del tornillo ACME en mm
  #define Tt 10 //Periodo del timer en Us
 
-int main(void)
-{
+int main(void){
 	cli();
 
 	//Pines control de motores a paso
@@ -66,15 +65,13 @@ int main(void)
 	Init_Counters(&Mx,&My,&Mz,&Mg);
 	
 	//Ejemplo 
-	Mx.ni=1.0;
-	Mx.nf=17.0; 
+	Mx.ni=0.0;
+	Mx.nf=5.0; 
 	My.ni=0.0;
-	My.nf=2.0;
+	My.nf=3.0;
 	Mz.ni=0.0;
 	Mz.nf=0.0;
-	Mx.Deltan=16;
-	Mx.SDn=800;
-	Mx.Tmn=98;
+	
 	//LEDS prueba comunicación serial
 	DDRC|=(1<<PINC0)|(1<<PINC1)|(1<<PINC2); 
 	PORTC&= ~(1<<PINC0)|(1<<PINC1)|(1<<PINC2);
@@ -82,38 +79,32 @@ int main(void)
 	timer1_init(); 
 	timer1_on();
 
+
 	sei();
 	
-	
-	
+
     while (1) 
     {
-		//escribeFlAChar(Mg.Vl,3);
-		//saltoLinea();
-		//_delay_ms(100);
-	if (Mx.ni != Mx.nf)
-	{ 
-		Move_X_Axis(&Mx,&Mg); 
-	}
-	One_Axis(&My,&Mg);
-		//if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
-			//if (Mg.OneShot==0){Mg.OneShot=1;Two_Axis(&Mx,&My,&Mg);}
-			//Move_XY_Axis(&Mx,&My,&Mg);
-			//}else if((Mx.ni != Mx.nf)&(My.ni == My.nf)){
-			//if(Mg.OneShot==0){Mg.OneShot=1;One_Axis(&Mx,Mg);}
-			//Move_X_Axis(&Mx,&Mg);
-			//}else if((Mx.ni == Mx.nf)&(My.ni != My.nf)){
-			//if(Mg.OneShot==0){Mg.OneShot=1;One_Axis(&My,Mg);}
-			//Move_Y_Axis(&My,&Mg);
-			//}else if(Mz.ni != Mz.nf){
-			//if(Mg.OneShot==0){Mg.OneShot=1;One_Axis(&Mz,Mg);}
-			//Move_Z_Axis(&Mz,&Mg);
-		//}
-			if (Mg.CountT1>65530||Mg.CountT2>65530){ //Reset 
-				Mg.CountT1=0; 
-				Mg.CountT2=0; 
-			}
-				
+		
+		
+	if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
+		if (Mg.OneShot==0){Mg.OneShot=1;Two_Axis(&Mx,&My,&Mg);}
+		Move_XY_Axis(&Mx,&My,&Mg);
+		}else if((Mx.ni != Mx.nf)&(My.ni == My.nf)){
+		if(Mg.OneShot==0){Mg.OneShot=1;One_Axis(&Mx,&Mg);}
+		Move_X_Axis(&Mx,&Mg);
+		}else if((Mx.ni == Mx.nf)&(My.ni != My.nf)){
+		if(Mg.OneShot==0){Mg.OneShot=1;One_Axis(&My,&Mg);}
+		Move_Y_Axis(&My,&Mg);
+		}else if(Mz.ni != Mz.nf){
+		if(Mg.OneShot==0){Mg.OneShot=1;One_Axis(&Mz,&Mg);}
+		Move_Z_Axis(&Mz,&Mg);
+		}
+		
+	//escribeFlAChar(Mx.Fmn,3);
+	//saltoLinea();
+	//_delay_ms(10);	
+			
     }
 }
 
@@ -149,7 +140,7 @@ void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG){
 	//Datos de movimiento 
 	Datos->Deltan=Datos->nf-Datos->ni; //Delta
 	//Datos->TDn=Datos->Deltan/Datos->Vln; //Tiempo en recorrer la distancia 
-	Datos->SDn=Datos->Deltan/DatosG->Dp; //Pasos para recorer la distancia 
+	Datos->SDn=(Datos->Deltan/DatosG->Dp)*2; //Pasos para recorer la distancia 
 	//Dir 
 }
 
@@ -158,7 +149,7 @@ void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY, GeneralMotor *DatosG);
 void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	
 	//Calculo de la Delta
-	DatosX->Deltan=DatosY->nf-DatosX->ni; //Delta X
+	DatosX->Deltan=DatosX->nf-DatosX->ni; //Delta X
 	DatosY->Deltan=DatosY->nf-DatosY->ni; //Delta Y
 	//Dir x
 	//Dir y
@@ -166,18 +157,20 @@ void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	DatosG->TDT=DatosG->DeltaT/DatosG->Vl;
 	
 	//Para Eje X 
+	DatosX->TDn=DatosX->Deltan/DatosG->Vl; 
 	DatosX->GDn=DatosG->TDT/DatosX->TDn;
 	//DatosX->Vln=DatosG->Vl/DatosX->GDn;
 	DatosX->Fmn=DatosG->Fm/DatosX->GDn;
-	DatosX->Tmn=(1/DatosX->Fmn)/DatosG->MT;	//Periodo modificado 
-	DatosX->SDn=DatosX->Deltan/DatosG->Dp; 
+	DatosX->Tmn=((1/DatosX->Fmn)*1000/DatosG->MT)-3;	//Periodo modificado 
+	DatosX->SDn=(DatosX->Deltan/DatosG->Dp)*2; 
 	
 	//Para Eje Y 
+	DatosY->TDn=DatosY->Deltan/DatosG->Vl; 
 	DatosY->GDn=DatosG->TDT/DatosY->TDn;
 	//DatosY->Vln=DatosG->Vl/DatosY->GDn;
 	DatosY->Fmn=DatosG->Fm/DatosY->GDn;
-	DatosY->Tmn=(1/DatosY->Fmn)/DatosG->MT;	//Periodo modificado 
-	DatosY->SDn=DatosY->Deltan/DatosG->Dp;
+	DatosY->Tmn=((1/DatosY->Fmn)*1000/DatosG->MT)-3;	//Periodo modificado 
+	DatosY->SDn=(DatosY->Deltan/DatosG->Dp)*2;
 }
 
 
@@ -232,7 +225,7 @@ void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	}
 	
 	if (DatosY->CountS<=DatosY->SDn){
-		if (DatosG->CountT2){ //Conteo para Periodo
+		if (DatosG->CountT2>DatosY->Tmn){ //Conteo para Periodo
 			PulseY //Pulse
 			DatosG->CountT2=0;
 			DatosY->CountS++;

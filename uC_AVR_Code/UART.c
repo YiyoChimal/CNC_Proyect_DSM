@@ -51,13 +51,19 @@ void escribeNumAChar(int num){
 }
 
 void escribeFlAChar(float num, char ndecimal){
+	
 	int In=num;
 	int dec=((num-In)*(pow(10,ndecimal)));
+	float ceros= (num-In)*10;
 	char buffer[20];
 	char dbuffer[20];
 	itoa(In, buffer, 10); //10: sistema numerico Decimal, 2:Sistema Numerico Binario
 	escribeSerial(buffer);
 	anexaSerial(46); //Punto decimal
+	while(ceros<1.0 & ceros!=0.0){
+		ceros=ceros*10;
+		anexaSerial('0');
+	}
 	itoa(dec, dbuffer, 10); //10: sistema numerico Decimal, 2:Sistema Numerico Binario
 	escribeSerial(dbuffer);
 }

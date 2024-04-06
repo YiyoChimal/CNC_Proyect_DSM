@@ -24,7 +24,7 @@ typedef struct{
 	float DeltaT; //Delta Total
 	float TDT;  //Tiempo en recorrer la delta 
 	float SDT; //Pasos para recorrer la delta 
-	unsigned int MT; //Modificador del periodo
+	float MT; //Modificador del periodo
 	volatile unsigned int CountT1; //Contador para el periodo uno
 	volatile unsigned int CountT2; //Contador para el periodo uno
 	volatile unsigned char OneShot; //Contador de un disparo
@@ -34,7 +34,7 @@ typedef struct{
 	
 	}GeneralMotor;
 
-	void CNC_Init(GeneralMotor *Datos,int RPM,int Sr,int Rs,unsigned int Tt); 
+	void CNC_Init(GeneralMotor *Datos,float RPM,float Sr,float Rs,float Tt); 
 
 
 	typedef struct{
