@@ -2,14 +2,16 @@
  * PruebasCNCC.c
  *
  * Created: 30/03/2024 07:35:40 p. m.
- * Author : yiyoc
+ * Author : axelf&yiyoc
  */ 
 #define F_CPU 16000000
 #define BAUD 9600
 
-#include "UART/UART.h" //Comunicación serial
+#include "LecturaG.h"
 #include "Timer/Timer.h" //Timer para PWM (Control de motores)
 #include "StepMotor/StepMotor.h" //Definir las caracteristicas de los motores a paso
+#include "UART/UART.h" //Comunicación serial
+
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -27,7 +29,9 @@ unsigned char numero=12;
 //StepMotors
 volatile unsigned int count0=0,count1=0;
 	GeneralMotor Mg;
-	
+	AxisMotor Mx;
+	AxisMotor My;
+	AxisMotor Mz;
 	
 #define PulseX PORTD^= (1<<PIND4); //Eje X
 #define DirX_P PORTD|=(1<<PIND7);
@@ -49,6 +53,8 @@ volatile unsigned int count0=0,count1=0;
  #define Rs 8//Distancia por vuelta del tornillo ACME en mm
  #define Tt 10 //Periodo del timer en Us
 
+float Ejem=-255.1265666; 
+
 int main(void){
 	cli();
 
@@ -58,17 +64,15 @@ int main(void){
 	
 	
 	//Configuracion inicial de motores a paso
-	AxisMotor Mx;
-	AxisMotor My;
-	AxisMotor Mz;
+	
 	CNC_Init(&Mg,RPM,Sr,Rs,Tt);
 	Init_Counters(&Mx,&My,&Mz,&Mg);
 	
 	//Ejemplo 
-	Mx.ni=0.0;
-	Mx.nf=5.0; 
+	Mx.ni=8.0;
+	Mx.nf=0.0; 
 	My.ni=0.0;
-	My.nf=3.0;
+	My.nf=0.0;
 	Mz.ni=0.0;
 	Mz.nf=0.0;
 	
@@ -79,14 +83,30 @@ int main(void){
 	timer1_init(); 
 	timer1_on();
 
+	
+	//Interruptions to detect the bits changing
+	EICRA|=(1<<ISC11); //Rising edge on INT1
+	EICRA|=(1<<ISC10);
+	EIMSK|=(1<<INT1); //Enable INT1
+
+	EICRA&=~(1<<ISC01); //Any edge on INT0
+	EICRA|=(1<<ISC00);
+	EIMSK|=(1<<INT0); //Enable INT0
+	
+	//Interrupciones por estado logico
+	PCICR|=(1<<PCIF0); //Abilita las interrupciones PCINT de los puertos B
+	PCMSK0|=(1<<PCINT4); //Para los puertos PB4
+	
+	
 
 	sei();
 	
 
     while (1) 
     {
-		
-		
+
+
+
 	if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
 		if (Mg.OneShot==0){Mg.OneShot=1;Two_Axis(&Mx,&My,&Mg);}
 		Move_XY_Axis(&Mx,&My,&Mg);
@@ -99,16 +119,25 @@ int main(void){
 		}else if(Mz.ni != Mz.nf){
 		if(Mg.OneShot==0){Mg.OneShot=1;One_Axis(&Mz,&Mg);}
 		Move_Z_Axis(&Mz,&Mg);
-		}
+	}
 		
-	//escribeFlAChar(Mx.Fmn,3);
+	//escribeFlAChar(Ejem,5);
 	//saltoLinea();
-	//_delay_ms(10);	
+	//_delay_ms(100);	
 			
     }
 }
 
+ISR(INT0_vect){
+	
+}
+ISR(INT1_vect){
+	
+}
 
+ISR(PCINT0_vect){
+	
+}
 
 ISR(TIMER1_COMPA_vect){	
 	Mg.CountT1++;
@@ -119,15 +148,11 @@ ISR(TIMER1_COMPA_vect){
 
 ISR(USART_RX_vect){
 	rx= UDR0;
-	
-	if (rx=='*'){
-		ComandoStr[RxContador]='\0';
-		RxContador=0;
-		if (strstr(ComandoStr,"a on")){PORTC|=(1<<PINC0);PORTC&= ~(1<<PINC1)|(1<<PINC2);
-			}else if (strstr(ComandoStr,"b on")){ PORTC|=(1<<PINC1); PORTC&= ~(1<<PINC0)|(1<<PINC2);}	
-	}else{ComandoStr[RxContador++]=rx;}		
+	LeerCodigo(rx);
+	Mx.nf=GetCordenadaX();
+	My.nf=GetCordenadaY();
+	Mz.nf=GetCordenadaZ();
 }
-
 
 void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG);
 
@@ -138,7 +163,7 @@ void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG){
 	Datos->Tmn=DatosG->Tm; //Periodo 
 	
 	//Datos de movimiento 
-	Datos->Deltan=Datos->nf-Datos->ni; //Delta
+	Datos->Deltan=abs(Datos->nf-Datos->ni); //Delta
 	//Datos->TDn=Datos->Deltan/Datos->Vln; //Tiempo en recorrer la distancia 
 	Datos->SDn=(Datos->Deltan/DatosG->Dp)*2; //Pasos para recorer la distancia 
 	//Dir 
@@ -149,8 +174,8 @@ void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY, GeneralMotor *DatosG);
 void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	
 	//Calculo de la Delta
-	DatosX->Deltan=DatosX->nf-DatosX->ni; //Delta X
-	DatosY->Deltan=DatosY->nf-DatosY->ni; //Delta Y
+	DatosX->Deltan=abs(DatosX->nf-DatosX->ni); //Delta X
+	DatosY->Deltan=abs(DatosY->nf-DatosY->ni); //Delta Y
 	//Dir x
 	//Dir y
 	DatosG->DeltaT=sqrt(pow(DatosX->Deltan,2)+pow(DatosY->Deltan,2));
@@ -179,7 +204,7 @@ void  Move_X_Axis(AxisMotor *Datos,GeneralMotor *DatosG);
 
 void  Move_X_Axis(AxisMotor *Datos,GeneralMotor *DatosG){
 	
-	if (DatosG->OneShotDir==0){DatosG->OneShotDir=1; DatosG->CountT1=0; if(Datos->Deltan>0){DirX_P}else{DirX_N}}//Dir
+	if (DatosG->OneShotDir==0){DatosG->OneShotDir=1; DatosG->CountT1=0; if((Datos->nf-Datos->ni)>0){DirX_P}else{DirX_N}}//Dir
 	
 	if (Datos->CountS<=Datos->SDn){ //Conteo de pasos 
 		if(DatosG->CountT1>Datos->Tmn){ //Conteo para Periodo 
@@ -191,7 +216,8 @@ void  Move_X_Axis(AxisMotor *Datos,GeneralMotor *DatosG){
 		Datos->ni=Datos->nf; 
 		//Prueba 
 		Datos->CountS=0; 
-		DatosG->CountT1=0; 
+		DatosG->CountT1=0;
+		DatosG->CountT2=0;  
 		DatosG->OneShot=0; 
 		DatosG->OneShotDir=0; 
 		
@@ -214,7 +240,7 @@ void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG);
 void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 
 	 
-	if (DatosG->OneShotDir==0){DatosG->OneShotDir=1; DatosG->CountT1=0; DatosG->CountT2=0;if (DatosX->Deltan>0){DirX_P}else{DirX_N} if (DatosY->Deltan>0){DirY_P}else{DirY_N}}//Dir
+	if (DatosG->OneShotDir==0){DatosG->OneShotDir=1; DatosG->CountT1=0; DatosG->CountT2=0;if ((DatosX->nf-DatosX->ni)>0){DirX_P}else{DirX_N} if ((DatosY->nf-DatosY->ni)>0){DirY_P}else{DirY_N}}//Dir
 	
 	if (DatosX->CountS<=DatosX->SDn){
 		if (DatosG->CountT1>DatosX->Tmn){ //Conteo para Periodo
@@ -245,6 +271,12 @@ void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	
 	
 }
+
+void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG); 
+void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG){
+	
+}
+
 
 void Init_Counters(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG); 
 void Init_Counters(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG){

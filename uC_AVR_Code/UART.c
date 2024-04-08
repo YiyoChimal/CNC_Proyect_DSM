@@ -51,19 +51,23 @@ void escribeNumAChar(int num){
 }
 
 void escribeFlAChar(float num, char ndecimal){
+	char buffer[20];//Cadena para Numeros enteros
+	char dbuffer[20];//Cadena para Numeors decimales
+	int dec=0; //Decimal
+	float ceros=0; //Ceros despues del punto
+	float In=(int)num; //Parte entera
 	
-	int In=num;
-	int dec=((num-In)*(pow(10,ndecimal)));
-	float ceros= (num-In)*10;
-	char buffer[20];
-	char dbuffer[20];
+	
+	
+	if (num>0){ceros= (num-In)*10;dec=((num-In)*(pow(10,ndecimal)));//Detección de num + o -
+		}else{ceros= (-num+In)*10;dec=((-num+In)*(pow(10,ndecimal)));}
+
+	
+	
 	itoa(In, buffer, 10); //10: sistema numerico Decimal, 2:Sistema Numerico Binario
 	escribeSerial(buffer);
 	anexaSerial(46); //Punto decimal
-	while(ceros<1.0 & ceros!=0.0){
-		ceros=ceros*10;
-		anexaSerial('0');
-	}
+	while(ceros<1.0 & ceros!=0.0){ceros=ceros*10;anexaSerial('0');}//Ceros despues del punto
 	itoa(dec, dbuffer, 10); //10: sistema numerico Decimal, 2:Sistema Numerico Binario
 	escribeSerial(dbuffer);
 }
