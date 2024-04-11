@@ -48,7 +48,7 @@ unsigned char LeerCodigo(char rx){
 			}else if (RxBuffer[j][0]=='Z'){
 				for (int d=0;d<20;d++){corZ[d]=RxBuffer[j][d+1];}
 				}else if(strstr(RxBuffer,"Homming")){
-					// PORTC^=(1<<PINC0); 
+					
 				}
 			}
 		
@@ -103,3 +103,4 @@ float GetCordenadaZ(){
 	cordenadaZ = strtod(corZ, &ptr);
 	return cordenadaZ;
 }
+

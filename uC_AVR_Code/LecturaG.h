@@ -13,6 +13,6 @@ float GetConfi();
 float GetCordenadaX();
 float GetCordenadaY();
 float GetCordenadaZ();
-
+char GetGoHome(); 
 
 #endif /* LECTURAG_H_ */

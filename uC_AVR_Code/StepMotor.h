@@ -9,6 +9,18 @@
 #ifndef GENERALMOTOR_H_
 #define GENERALMOTOR_H_
 
+#define PulseX PORTD^= (1<<PIND4); //Eje X
+#define DirX_P PORTD|=(1<<PIND7);
+#define DirX_N PORTD&=~(1<<PIND7);
+
+#define PulseY PORTD^= (1<<PIND5);	//Eje Y
+#define DirY_P PORTB|=(1<<PINB0);
+#define DirY_N PORTB&=~(1<<PINB0);
+
+#define PulseZ PORTD^= (1<<PIND6);	//Eje Z
+#define DirZ_P PORTB|=(1<<PINB1);
+#define DirZ_N PORTB&=~(1<<PINB1);
+
 
 typedef struct{
 	//Caracteristicas para todos los motores a pasos
@@ -28,8 +40,9 @@ typedef struct{
 	volatile unsigned int CountT1; //Contador para el periodo uno
 	volatile unsigned int CountT2; //Contador para el periodo uno
 	volatile unsigned char OneShot; //Contador de un disparo
-	volatile unsigned char OneShotDir; //Contador para dirección  
+	//volatile unsigned char OneShotDir; //Contador para dirección  
 	unsigned char GoHome; 
+	volatile unsigned char OneShotHome; 
 	//void (*Init)(struct GeneralMotor *Datos); //Nombre de la función, datos a dar en la funcion en ester cadao la estructura
 	
 	
@@ -57,7 +70,15 @@ typedef struct{
 		
 	}AxisMotor;
 
-	
+	void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG);
+	void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY, GeneralMotor *DatosG);
+	void  Move_X_Axis(AxisMotor *Datos,GeneralMotor *DatosG);
+	void  Move_Y_Axis(AxisMotor *Datos,GeneralMotor *DatosG);
+	void  Move_Z_Axis(AxisMotor *Datos,GeneralMotor *DatosG);
+	void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG);
+	void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG,float Hm_X,float Hm_Y,float Hm_Z );
+	void Init_Counters_Data(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG);
+
 
 #endif /* GENERALMOTOR_H_ */
 
