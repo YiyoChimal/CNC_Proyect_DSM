@@ -52,6 +52,11 @@ volatile unsigned int count0=0,count1=0;
  #define Sr 400//Pasos por vuelta
  #define Rs 8//Distancia por vuelta del tornillo ACME en mm
  #define Tt 10 //Periodo del timer en Us
+//Punto cero_Cordenadas de la cama
+#define H_X 1.0
+#define H_Y 1.0
+#define H_Z 1.0
+
 
 float Ejem=-255.1265666; 
 
@@ -61,12 +66,13 @@ int main(void){
 	//Pines control de motores a paso
 	DDRD|= (1<<PIND4)|(1<<PIND5)|(1<<PIND6)|(1<<PIND7); //Pulse 1, Pulse 2, Pulse 3, Dir1
 	DDRB|=(1<<PINB0)|(1<<PINB1); //Dir2,Dir3
-	
-	
+	//Interrupciones globales 
+	DDRD&=~(1<<PIND2)|(1<<PIND3); 
+	DDRB&=~(1<<PINB4); 
 	//Configuracion inicial de motores a paso
 	
 	CNC_Init(&Mg,RPM,Sr,Rs,Tt);
-	Init_Counters(&Mx,&My,&Mz,&Mg);
+	Init_Counters_Data(&Mx,&My,&Mz,&Mg);
 	
 	//Ejemplo 
 	Mx.ni=8.0;
@@ -89,12 +95,12 @@ int main(void){
 	EICRA|=(1<<ISC10);
 	EIMSK|=(1<<INT1); //Enable INT1
 
-	EICRA&=~(1<<ISC01); //Any edge on INT0
+	EICRA|=(1<<ISC01); //Rising edge on INT0
 	EICRA|=(1<<ISC00);
 	EIMSK|=(1<<INT0); //Enable INT0
 	
 	//Interrupciones por estado logico
-	PCICR|=(1<<PCIF0); //Abilita las interrupciones PCINT de los puertos B
+	PCICR|=(1<<PCIE0); //Abilita las interrupciones PCINT de los puertos B
 	PCMSK0|=(1<<PCINT4); //Para los puertos PB4
 	
 	
@@ -105,7 +111,7 @@ int main(void){
     while (1) 
     {
 
-
+//if (Mg.OneShot==0){Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z);Mg.OneShot=1;}
 
 	if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
 		if (Mg.OneShot==0){Mg.OneShot=1;Two_Axis(&Mx,&My,&Mg);}
@@ -121,7 +127,7 @@ int main(void){
 		Move_Z_Axis(&Mz,&Mg);
 	}
 		
-	//escribeFlAChar(Ejem,5);
+	//escribeFlAChar(Mz.SDn,5);
 	//saltoLinea();
 	//_delay_ms(100);	
 			
@@ -129,13 +135,21 @@ int main(void){
 }
 
 ISR(INT0_vect){
-	
+	Mg.GoHome=1; 
+	//PORTC|=(1<<PINB0); 
 }
 ISR(INT1_vect){
-	
+	Mg.GoHome=1; 
+	//PORTC&=~(1<<PINB0); 
 }
 
 ISR(PCINT0_vect){
+	if (PINB & (1<<PINB4)>0){ //Solo cuando el pulso sea de subida
+		Mg.GoHome=1; 
+		//PORTC|=(1<<PINB0);
+		////PORTC&=~(1<<PINB0); 
+	}	
+	//PORTC^= (1<<PINC0);
 	
 }
 
@@ -272,14 +286,119 @@ void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	
 }
 
-void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG); 
-void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG){
+void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG,float Hm_X,float Hm_Y,float Hm_Z ); 
+void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG,float Hm_X,float Hm_Y,float Hm_Z ){
+	//Distancia a recorrer 
+	float Dc_X=15.0,Dc_Y=15.0,Dc_Z=15.0; //Distancia a la cama; 
 	
+	DatosX->nf=Hm_X+Dc_X; 
+	DatosY->nf=Hm_Y+Dc_Y; 	
+	DatosZ->nf=Hm_Z+Dc_Z; 	
+	
+	DatosX->Deltan=abs(DatosX->nf-DatosX->ni); //Delta X
+	DatosY->Deltan=abs(DatosY->nf-DatosY->ni); //Delta Y
+	DatosZ->Deltan=abs(DatosZ->nf-DatosZ->ni); //Delta Z
+	
+	//Pasos para el origen 
+	DatosX->SDn=(DatosX->Deltan/DatosG->Dp)*2;//Pasos X
+	DatosY->SDn=(DatosY->Deltan/DatosG->Dp)*2;//Pasos Y
+	DatosZ->SDn=(DatosZ->Deltan/DatosG->Dp)*2;//Pasos Z
+	
+	//Movimiento 
+	DirX_P DirY_P DirZ_P //Direcciones hacio los switch
+	
+	//Eje Z
+	DatosG->GoHome=0; //Activar recorrido hacia eje Z
+	DatosG->CountT1=0; //Reinicio de timer 
+	
+	while(DatosG->GoHome==0){
+	if (DatosG->CountT1>DatosG->Tm){ //Conteo para Periodo
+		PulseZ
+		DatosG->CountT1=0;
+	}
+	}
+	
+	_delay_ms(100);
+	DirZ_N
+	DatosG->CountT1=0; //Reinicio de timer 
+	while(DatosZ->CountS<=(DatosZ->SDn)){	//Conteo de pasos 
+			if(DatosG->CountT1>DatosG->Tm){ //Conteo para Periodo
+				PulseZ 
+				DatosZ->CountS++;
+				DatosG->CountT1=0;
+			}
+	}
+	
+	
+	//Eje X
+	DatosG->GoHome=0;//Activar recorrido Hacia eje X
+	DatosG->CountT1=0;//Reincio de timer 
+	
+	while(DatosG->GoHome==0){
+		if (DatosG->CountT1>DatosG->Tm){ //Conteo para Periodo
+			PulseX
+			DatosG->CountT1=0;
+		}
+	}
+	
+	_delay_ms(100);
+	DirX_N
+	DatosG->CountT1=0; //Reinicio de timer
+	
+	while(DatosX->CountS<=(DatosX->SDn)){	//Conteo de pasos
+		if(DatosG->CountT1>DatosG->Tm){ //Conteo para Periodo
+			PulseX
+			DatosX->CountS++;
+			DatosG->CountT1=0;
+		}
+	}
+	
+	
+	//Eje Y
+	DatosG->GoHome=0;//Activar recorrido Hacia eje X
+	DatosG->CountT1=0;//Reincio de timer
+	
+	while(DatosG->GoHome==0){
+		if (DatosG->CountT1>DatosG->Tm){ //Conteo para Periodo
+			PulseY
+			DatosG->CountT1=0;
+		}
+	}
+	
+	_delay_ms(100);
+	DirY_N
+	DatosG->CountT1=0; //Reinicio de timer
+	
+	while(DatosY->CountS<=(DatosY->SDn)){	//Conteo de pasos
+		if(DatosG->CountT1>DatosG->Tm){ //Conteo para Periodo
+			PulseY
+			DatosY->CountS++;
+			DatosG->CountT1=0;
+		}
+	}
+	
+	//Reinico de contadores  
+	DatosG->GoHome=0;//Reiniciar
+	DatosG->CountT1=0;//Reincio de timer
+	DatosG->CountT2=0;
+	DatosX->CountS=0;
+	DatosY->CountS=0;
+	DatosZ->CountS=0;
+	//Establecer punto cero 
+	DatosX->ni=DatosX->nf=0; 
+	DatosY->ni=DatosY->nf=0; 
+	DatosZ->ni=DatosZ->nf=0; 
 }
 
 
-void Init_Counters(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG); 
-void Init_Counters(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG){
+void Init_Counters_Data(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG); 
+void Init_Counters_Data(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG){
+	//Cordenadas
+	DatosG->GoHome=0; 
+	DatosX->ni=DatosX->nf=0;
+	DatosY->ni=DatosY->nf=0;
+	DatosZ->ni=DatosZ->nf=0;
+	//Contadores
 	DatosX->CountS=0;
 	DatosY->CountS=0;
 	DatosZ->CountS=0;
