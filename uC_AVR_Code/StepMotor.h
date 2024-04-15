@@ -48,9 +48,6 @@ typedef struct{
 	
 	}GeneralMotor;
 
-	void CNC_Init(GeneralMotor *Datos,float RPM,float Sr,float Rs,float Tt); 
-
-
 	typedef struct{
 		
 		//Iniciales
@@ -69,7 +66,8 @@ typedef struct{
 		volatile unsigned int CountS; //Contador para los Pasos 
 		
 	}AxisMotor;
-
+	
+	void CNC_Init(GeneralMotor *Datos,float RPM,float Sr,float Rs,float Tt); 
 	void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG);
 	void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY, GeneralMotor *DatosG);
 	void  Move_X_Axis(AxisMotor *Datos,GeneralMotor *DatosG);

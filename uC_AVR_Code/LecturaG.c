@@ -16,7 +16,7 @@
 
 
 char RxBuffer[10][20],instruccion[20],corX[20],corY[20],corZ[20];
-volatile unsigned char RxContador_G=0,j=0; 
+volatile unsigned char RxContador_G=0,j=0,OneShotHome=0; 
 int identi=0;
 
 
@@ -29,27 +29,28 @@ unsigned char LeerCodigo(char rx){
 		//Cerarra las cadenas de caracteres;
 		RxBuffer[j][RxContador_G]= '\0';
 	
-		//Imprimir la cadena de cararcters leida.
-		anexaSerial(10);
-		for (int i=0;i<=j;i++){
-			for (int p=0;p<20;p++){anexaSerial(RxBuffer[i][p]);}
-			anexaSerial(32);
-		}
-		anexaSerial(10);
+		////Imprimir la cadena de cararcters leida.
+		//anexaSerial(10);
+		//for (int i=0;i<=j;i++){
+			//for (int p=0;p<20;p++){anexaSerial(RxBuffer[i][p]);}
+			//anexaSerial(32);
+		//}
+		//anexaSerial(10);
 		
 		//Detección de instrucción y eje de cordenadas 
-		for(int Ins; Ins<=j; Ins++){
-			if (RxBuffer[j][0]=='G' || RxBuffer[j][0]=='M' ){
-				for (int d=0;d<20;d++){instruccion[d]=RxBuffer[j][d+1];}
-			}else if (RxBuffer[j][0]=='X'){
-				for (int d=0;d<20;d++){corX[d]=RxBuffer[j][d+1];}
-			}else if (RxBuffer[j][0]=='Y'){
-				for (int d=0;d<20;d++){corY[d]=RxBuffer[j][d+1];}
-			}else if (RxBuffer[j][0]=='Z'){
-				for (int d=0;d<20;d++){corZ[d]=RxBuffer[j][d+1];}
-				}else if(strstr(RxBuffer,"Homming")){
-					
-				}
+		for(int Ins=0; Ins<=j; Ins++){
+			
+			if (RxBuffer[Ins][0]=='G' || RxBuffer[Ins][0]=='M' ){
+				for (int d=0;d<20;d++){instruccion[d]=RxBuffer[Ins][d+1];}
+			}else if (RxBuffer[Ins][0]=='X'){
+				PORTC^=(1<<PINC0); 
+				for (int d=0;d<20;d++){corX[d]=RxBuffer[Ins][d+1];}
+			}else if (RxBuffer[Ins][0]=='Y'){
+				for (int d=0;d<20;d++){corY[d]=RxBuffer[Ins][d+1];}
+			}else if (RxBuffer[Ins][0]=='Z'){
+				for (int d=0;d<20;d++){corZ[d]=RxBuffer[Ins][d+1];}
+			}else if(strstr(RxBuffer,"Homming")){OneShotHome=1; //Activa la rutina de Homming 
+			}else{OneShotHome=0;}	 
 			}
 		
 		//Reiniciar los contadores y vector 
@@ -104,3 +105,6 @@ float GetCordenadaZ(){
 	return cordenadaZ;
 }
 
+char GetGoHome(){
+	return OneShotHome; //Activa la rutina de Homming 
+}

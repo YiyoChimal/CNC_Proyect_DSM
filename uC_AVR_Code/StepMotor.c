@@ -12,7 +12,9 @@
  
 #include <avr/io.h>
 #include <math.h> // Para Calculos
+#include <util/delay.h>
 #include "StepMotor.h"
+
 
 void CNC_Init(GeneralMotor *Datos,float RPM, float Sr, float Rs,float Tt){
 //Unidades en mm, seg 
@@ -31,6 +33,7 @@ void CNC_Init(GeneralMotor *Datos,float RPM, float Sr, float Rs,float Tt){
 	
 }
 
+
 void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG){
 	//Datos de congifuración;
 	Datos->Vln=DatosG->Vl; //Velolcidad linean
@@ -38,18 +41,17 @@ void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG){
 	Datos->Tmn=DatosG->Tm; //Periodo
 	
 	//Datos de movimiento
-	Datos->Deltan=abs(Datos->nf-Datos->ni); //Delta
+	Datos->Deltan=fabs(Datos->nf-Datos->ni); //Delta
 	//Datos->TDn=Datos->Deltan/Datos->Vln; //Tiempo en recorrer la distancia
 	Datos->SDn=(Datos->Deltan/DatosG->Dp)*2; //Pasos para recorer la distancia
 	//Dir
 }
 
-
 void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	
 	//Calculo de la Delta
-	DatosX->Deltan=abs(DatosX->nf-DatosX->ni); //Delta X
-	DatosY->Deltan=abs(DatosY->nf-DatosY->ni); //Delta Y
+	DatosX->Deltan=fabs(DatosX->nf-DatosX->ni); //Delta X
+	DatosY->Deltan=fabs(DatosY->nf-DatosY->ni); //Delta Y
 	
 	DatosG->DeltaT=sqrt(pow(DatosX->Deltan,2)+pow(DatosY->Deltan,2));
 	DatosG->TDT=DatosG->DeltaT/DatosG->Vl;
@@ -143,10 +145,11 @@ void Move_Z_Axis(AxisMotor *Datos,GeneralMotor *DatosG){
 void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 
 	
-	if ((DatosX->nf-DatosX->ni)>0){DirX_P}else{DirX_N} if ((DatosY->nf-DatosY->ni)>0){DirY_P}else{DirY_N}//Dir
+	if ((DatosX->nf-DatosX->ni)>0){DirX_P}else{DirX_N}//Dir
+	if ((DatosY->nf-DatosY->ni)>0){DirY_P}else{DirY_N}//Dir
 	DatosG->CountT1=0; DatosG->CountT2=0;//Reiniciar los contadores
 	
-	while(DatosG->OneShot=0){
+	while(DatosG->OneShot==0){
 		if (DatosX->CountS<=DatosX->SDn){
 			if (DatosG->CountT1>DatosX->Tmn){ //Conteo para Periodo
 				PulseX //Pulse
@@ -182,6 +185,7 @@ void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG){
 	
 }
 
+
 void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG,float Hm_X,float Hm_Y,float Hm_Z ){
 	//Distancia a recorrer
 	float Dc_X=15.0,Dc_Y=15.0,Dc_Z=15.0; //Distancia a la cama;
@@ -190,9 +194,9 @@ void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *Da
 	DatosY->nf=Hm_Y+Dc_Y;
 	DatosZ->nf=Hm_Z+Dc_Z;
 	
-	DatosX->Deltan=abs(DatosX->nf-DatosX->ni); //Delta X
-	DatosY->Deltan=abs(DatosY->nf-DatosY->ni); //Delta Y
-	DatosZ->Deltan=abs(DatosZ->nf-DatosZ->ni); //Delta Z
+	DatosX->Deltan=fabs(DatosX->nf-DatosX->ni); //Delta X
+	DatosY->Deltan=fabs(DatosY->nf-DatosY->ni); //Delta Y
+	DatosZ->Deltan=fabs(DatosZ->nf-DatosZ->ni); //Delta Z
 	
 	//Pasos para el origen
 	DatosX->SDn=(DatosX->Deltan/DatosG->Dp)*2;//Pasos X
@@ -276,13 +280,16 @@ void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *Da
 	DatosG->GoHome=0;//Reiniciar
 	DatosG->CountT1=0;//Reincio de timer
 	DatosG->CountT2=0;
+	DatosG->OneShotHome=0; 
 	DatosX->CountS=0;
 	DatosY->CountS=0;
 	DatosZ->CountS=0;
+	
 	//Establecer punto cero
 	DatosX->ni=DatosX->nf=0;
 	DatosY->ni=DatosY->nf=0;
 	DatosZ->ni=DatosZ->nf=0;
+	
 }
 
 void Init_Counters_Data(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG){

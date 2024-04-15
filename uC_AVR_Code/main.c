@@ -33,10 +33,10 @@ volatile unsigned int count0=0,count1=0;
 
 
 //Calculos
- #define RPM 120//Revoluciónes por minuto
- #define Sr 400//Pasos por vuelta
- #define Rs 8//Distancia por vuelta del tornillo ACME en mm
- #define Tt 10 //Periodo del timer en Us
+ #define RPM 120.0//Revoluciónes por minuto
+ #define Sr 400.0//Pasos por vuelta
+ #define Rs 8.0//Distancia por vuelta del tornillo ACME en mm
+ #define Tt 10.0 //Periodo del timer en Us
 //Punto cero_Cordenadas de la cama
 #define H_X 1.0
 #define H_Y 1.0
@@ -60,10 +60,10 @@ int main(void){
 	Init_Counters_Data(&Mx,&My,&Mz,&Mg);
 	
 	//Ejemplo 
-	Mx.ni=8.0;
-	Mx.nf=0.0; 
+	Mx.ni=0.0;
+	Mx.nf=5.0; 
 	My.ni=0.0;
-	My.nf=0.0;
+	My.nf=3.0;
 	Mz.ni=0.0;
 	Mz.nf=0.0;
 	
@@ -74,7 +74,6 @@ int main(void){
 	timer1_init(); 
 	timer1_on();
 
-	
 	//Interruptions to detect the bits changing
 	EICRA|=(1<<ISC11); //Rising edge on INT1
 	EICRA|=(1<<ISC10);
@@ -87,32 +86,43 @@ int main(void){
 	//Interrupciones por estado logico
 	PCICR|=(1<<PCIE0); //Abilita las interrupciones PCINT de los puertos B
 	PCMSK0|=(1<<PCINT4); //Para los puertos PB4
-	
-	
 
 	sei();
 	
 
     while (1) 
     {
-
-//if (Mg.OneShot==0){Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z);Mg.OneShot=1;}
-
-	if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
-		Two_Axis(&Mx,&My,&Mg);
-		Move_XY_Axis(&Mx,&My,&Mg);
-		}else if((Mx.ni != Mx.nf)&(My.ni == My.nf)){
-		One_Axis(&Mx,&Mg);
-		Move_X_Axis(&Mx,&Mg);
-		}else if((Mx.ni == Mx.nf)&(My.ni != My.nf)){
-		One_Axis(&My,&Mg);
-		Move_Y_Axis(&My,&Mg);
-		}else if(Mz.ni != Mz.nf){
-		One_Axis(&Mz,&Mg);
-		Move_Z_Axis(&Mz,&Mg);
-	}
-		
-	//escribeFlAChar(Mz.SDn,5);
+		//if (Mg.OneShot==0)
+		//{
+			//Mg.OneShot=1;Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z); 
+		//}
+	
+		if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
+			Two_Axis(&Mx,&My,&Mg);
+			Move_XY_Axis(&Mx,&My,&Mg);
+			}else if((Mx.ni != Mx.nf)&(My.ni == My.nf)){
+			One_Axis(&Mx,&Mg);
+			Move_X_Axis(&Mx,&Mg);
+			}else if((Mx.ni == Mx.nf)&(My.ni != My.nf)){
+			One_Axis(&My,&Mg);
+			Move_Y_Axis(&My,&Mg);
+			}else if(Mz.ni != Mz.nf){
+			One_Axis(&Mz,&Mg);
+			Move_Z_Axis(&Mz,&Mg);
+			}else if(Mg.OneShotHome==1){
+			Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z); 
+		}
+		//
+		//_delay_ms(50);
+		//saltoLinea();
+		//escribeFlAChar(Mx.nf,3);
+		//saltoLinea();
+		//escribeFlAChar(My.nf,3);
+		//saltoLinea();
+		//escribeFlAChar(Mz.nf,3);
+		//_delay_ms(50);
+		//saltoLinea();
+	//escribeFlAChar(Mx.Tmn,5);
 	//saltoLinea();
 	//_delay_ms(100);	
 			
@@ -133,8 +143,8 @@ ISR(PCINT0_vect){
 }
 
 ISR(TIMER1_COMPA_vect){	
-	Mg.CountT1++;
-	Mg.CountT2++;
+	Mg.CountT1++; //Contador 1
+	Mg.CountT2++; //Contador 2
 }
 
 
@@ -145,6 +155,9 @@ ISR(USART_RX_vect){
 	Mx.nf=GetCordenadaX();
 	My.nf=GetCordenadaY();
 	Mz.nf=GetCordenadaZ();
-	
+	Mg.OneShotHome=GetGoHome(); 
 }
+
+
+
 
