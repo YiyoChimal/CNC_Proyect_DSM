@@ -96,21 +96,26 @@ int main(void){
 		//{
 			//Mg.OneShot=1;Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z); 
 		//}
-	
+	//
 		if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
 			Two_Axis(&Mx,&My,&Mg);
 			Move_XY_Axis(&Mx,&My,&Mg);
+			FinishMove(); 
 			}else if((Mx.ni != Mx.nf)&(My.ni == My.nf)){
 			One_Axis(&Mx,&Mg);
 			Move_X_Axis(&Mx,&Mg);
+			FinishMove(); 
 			}else if((Mx.ni == Mx.nf)&(My.ni != My.nf)){
 			One_Axis(&My,&Mg);
 			Move_Y_Axis(&My,&Mg);
+			FinishMove(); 
 			}else if(Mz.ni != Mz.nf){
 			One_Axis(&Mz,&Mg);
 			Move_Z_Axis(&Mz,&Mg);
+			FinishMove(); 
 			}else if(Mg.OneShotHome==1){
 			Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z); 
+			FinishMove(); 
 		}
 		//
 		//_delay_ms(50);
@@ -160,4 +165,7 @@ ISR(USART_RX_vect){
 
 
 
-
+void FinishMove(); 
+void FinishMove(){
+	escribeSerial("End"); //
+}
