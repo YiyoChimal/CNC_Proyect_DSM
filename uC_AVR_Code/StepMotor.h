@@ -40,11 +40,12 @@ typedef struct{
 	volatile unsigned int CountT1; //Contador para el periodo uno
 	volatile unsigned int CountT2; //Contador para el periodo uno
 	volatile unsigned char OneShot; //Contador de un disparo
-	//volatile unsigned char OneShotDir; //Contador para dirección  
 	unsigned char GoHome; 
 	volatile unsigned char OneShotHome; 
-	//void (*Init)(struct GeneralMotor *Datos); //Nombre de la función, datos a dar en la funcion en ester cadao la estructura
-	
+	//
+	unsigned char ComanG; //Comando G 	
+	float I; 
+	float J; 
 	
 	}GeneralMotor;
 
@@ -67,6 +68,19 @@ typedef struct{
 		
 	}AxisMotor;
 	
+	typedef struct{
+		float Pi[2];
+		float Pf[2];
+		float R[2];
+		float C[2]; //Vector
+		float AngleT; 
+		float AIncrement; 
+		float RIncrement; 
+		unsigned int n; 
+			
+	}Curve;
+	
+	
 	void CNC_Init(GeneralMotor *Datos,float RPM,float Sr,float Rs,float Tt); 
 	void One_Axis(AxisMotor *Datos, GeneralMotor *DatosG);
 	void Two_Axis(AxisMotor *DatosX,AxisMotor *DatosY, GeneralMotor *DatosG);
@@ -76,7 +90,7 @@ typedef struct{
 	void Move_XY_Axis(AxisMotor *DatosX,AxisMotor *DatosY,GeneralMotor *DatosG);
 	void Home(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG,float Hm_X,float Hm_Y,float Hm_Z );
 	void Init_Counters_Data(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,GeneralMotor *DatosG);
-
-
+	void CurveSet(AxisMotor *DatosX, AxisMotor *DatosY, GeneralMotor *DatosG,Curve *DatosC,float DivAngle); 
+	void CurvePoints(AxisMotor *DatosX, AxisMotor *DatosY, GeneralMotor *DatosG,Curve *DatosC,float DivAngle); 
 #endif /* GENERALMOTOR_H_ */
 

@@ -18,32 +18,27 @@
 #include "StepMotor/StepMotor.h" //Definir las caracteristicas de los motores a paso
 #include "UART/UART.h" //Comunicación serial
 
-//RX
-char ComandoStr[20]; //Almacenamiento de strings
-volatile unsigned char RxContador=0; //Contador para la resepción de datos
-char rx='\0'; //Almacenador de datos tipo Char
-unsigned char numero=12; 
-
-//StepMotors
-volatile unsigned int count0=0,count1=0;
-	GeneralMotor Mg;
-	AxisMotor Mx;
-	AxisMotor My;
-	AxisMotor Mz;
-
-
 //Calculos
- #define RPM 120.0//Revoluciónes por minuto
- #define Sr 400.0//Pasos por vuelta
- #define Rs 8.0//Distancia por vuelta del tornillo ACME en mm
- #define Tt 10.0 //Periodo del timer en Us
+#define RPM 120.0//Revoluciónes por minuto
+#define Sr 400.0//Pasos por vuelta
+#define Rs 8.0//Distancia por vuelta del tornillo ACME en mm
+#define Tt 10.0 //Periodo del timer en Us
 //Punto cero_Cordenadas de la cama
 #define H_X 1.0
 #define H_Y 1.0
 #define H_Z 1.0
+//Resolución de curvas 
+#define DivAngle 2.0 //Angulo a dividir
 
-
-float Ejem=-255.1265666; 
+//StepMotors
+volatile unsigned int count0=0,count1=0;
+GeneralMotor Mg;
+AxisMotor Mx;
+AxisMotor My;
+AxisMotor Mz;
+Curve C; 
+//Comunicación Serial 
+char rx='\0';
 
 int main(void){
 	cli();
@@ -58,14 +53,6 @@ int main(void){
 	
 	CNC_Init(&Mg,RPM,Sr,Rs,Tt);
 	Init_Counters_Data(&Mx,&My,&Mz,&Mg);
-	
-	//Ejemplo 
-	Mx.ni=0.0;
-	Mx.nf=5.0; 
-	My.ni=0.0;
-	My.nf=3.0;
-	Mz.ni=0.0;
-	Mz.nf=0.0;
 	
 	//LEDS prueba comunicación serial
 	DDRC|=(1<<PINC0)|(1<<PINC1)|(1<<PINC2); 
@@ -92,45 +79,50 @@ int main(void){
 
     while (1) 
     {
-		//if (Mg.OneShot==0)
-		//{
-			//Mg.OneShot=1;Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z); 
-		//}
-	//
-		if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
-			Two_Axis(&Mx,&My,&Mg);
-			Move_XY_Axis(&Mx,&My,&Mg);
-			FinishMove(); 
-			}else if((Mx.ni != Mx.nf)&(My.ni == My.nf)){
-			One_Axis(&Mx,&Mg);
-			Move_X_Axis(&Mx,&Mg);
-			FinishMove(); 
-			}else if((Mx.ni == Mx.nf)&(My.ni != My.nf)){
-			One_Axis(&My,&Mg);
-			Move_Y_Axis(&My,&Mg);
-			FinishMove(); 
-			}else if(Mz.ni != Mz.nf){
-			One_Axis(&Mz,&Mg);
-			Move_Z_Axis(&Mz,&Mg);
-			FinishMove(); 
-			}else if(Mg.OneShotHome==1){
-			Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z); 
-			FinishMove(); 
+		if(Mg.ComanG==0 || Mg.ComanG==1){
+			if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
+				Two_Axis(&Mx,&My,&Mg);
+				Move_XY_Axis(&Mx,&My,&Mg);
+				escribeSerial("FinisH");
+				}else if((Mx.ni != Mx.nf)&(My.ni == My.nf)){
+				One_Axis(&Mx,&Mg);
+				Move_X_Axis(&Mx,&Mg);
+				escribeSerial("FinisH");
+				}else if((Mx.ni == Mx.nf)&(My.ni != My.nf)){
+				One_Axis(&My,&Mg);
+				Move_Y_Axis(&My,&Mg);
+				escribeSerial("FinisH");
+				}else if(Mz.ni != Mz.nf){
+				One_Axis(&Mz,&Mg);
+				Move_Z_Axis(&Mz,&Mg);
+				escribeSerial("FinisH");
+				}else if(Mg.OneShotHome==1){
+				Home(&Mx,&My,&Mz,&Mg,H_X,H_Y,H_Z);
+				escribeSerial("FinisH");
+			}
+		}else if(Mg.ComanG==2 || Mg.ComanG==3){
+			if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
+			CurveSet(&Mx,&My,&Mg,&C,DivAngle); 
+			}
 		}
-		//
-		//_delay_ms(50);
-		//saltoLinea();
-		//escribeFlAChar(Mx.nf,3);
-		//saltoLinea();
-		//escribeFlAChar(My.nf,3);
-		//saltoLinea();
-		//escribeFlAChar(Mz.nf,3);
-		//_delay_ms(50);
-		//saltoLinea();
-	//escribeFlAChar(Mx.Tmn,5);
-	//saltoLinea();
-	//_delay_ms(100);	
-			
+		
+		//if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
+			//CurveSet(&Mx,&My,&Mg,&C,DivAngle);
+			////Two_Axis(&Mx,&My,&Mg);
+			////Move_XY_Axis(&Mx,&My,&Mg);
+			////CurveSet(&Mx,&My,&Mg,&C,DivAngle);
+			//escribeFlAChar(C.R[0],4);
+			//saltoLinea();
+			//escribeFlAChar(C.R[1],4);
+			//saltoLinea();
+			//escribeFlAChar(Mx.nf,4);
+			//saltoLinea(); 
+			//escribeFlAChar(My.nf,4);
+			//saltoLinea(); 
+			//Mx.ni=Mx.nf;
+			//My.ni=My.nf; 
+			//
+		//}
     }
 }
 
@@ -157,6 +149,9 @@ ISR(TIMER1_COMPA_vect){
 ISR(USART_RX_vect){
 	rx= UDR0;
 	LeerCodigo(rx);
+	Mg.ComanG=GetConfi(); 
+	Mg.I=GetCordenadai();
+	Mg.J=GetCordenadaj(); 
 	Mx.nf=GetCordenadaX();
 	My.nf=GetCordenadaY();
 	Mz.nf=GetCordenadaZ();
@@ -164,8 +159,3 @@ ISR(USART_RX_vect){
 }
 
 
-
-void FinishMove(); 
-void FinishMove(){
-	escribeSerial("End"); //
-}

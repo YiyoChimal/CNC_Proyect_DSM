@@ -14,7 +14,7 @@
 #include <math.h> // Para Calculos
 #include <util/delay.h>
 #include "StepMotor.h"
-
+#define PI 3.1459
 
 void CNC_Init(GeneralMotor *Datos,float RPM, float Sr, float Rs,float Tt){
 //Unidades en mm, seg 
@@ -308,4 +308,53 @@ void Init_Counters_Data(AxisMotor *DatosX,AxisMotor *DatosY,AxisMotor *DatosZ,Ge
 	//DatosG->OneShotDir=0;
 }
 
+
+void CurveSet(AxisMotor *DatosX, AxisMotor *DatosY, GeneralMotor *DatosG,Curve *DatosC,float DivAngle){
+	//Datos generales
+	DatosC->Pi[0]=DatosX->ni; //X inicio
+	DatosC->Pi[1]=DatosY->ni; //Y inicio
+	DatosC->Pf[0]=DatosX->nf; //X final 
+	DatosC->Pf[1]=DatosY->nf; //Y final
+	
+	DatosC->R[0]=(DatosX->ni)+DatosG->I; //X del radio
+	DatosC->R[1]=(DatosY->ni)+DatosG->J; //Y del radio 
+	DatosC->AngleT=(2*(atan(fabs(DatosG->J)/fabs(DatosG->I))))*180/PI; //Angulo entre el punto de inicio y el punto final en radianes
+	DatosC->n=DatosC->AngleT/DivAngle-1; //Número de repeticiones 
+	
+	if(DatosG->ComanG==2){	//Indica si en sentido de las manecillas del reloj 
+	DivAngle=(-1)*(DivAngle); 
+	}
+	
+	DatosC->AIncrement=DivAngle;
+	
+	for(int N=0; N<DatosC->n; N++){
+	DatosC->RIncrement=DatosC->AIncrement*PI/180; // Incremento en radianes
+	DatosC->C[0]=((-1*DatosG->I)*cos(DatosC->RIncrement))-((-1*DatosG->J)*sin(DatosC->RIncrement)); //i
+	DatosC->C[1]=((-1*DatosG->I)*sin(DatosC->RIncrement))+((-1*DatosG->I)*cos(DatosC->RIncrement)); //j
+	DatosX->nf=DatosC->R[0]+DatosC->C[0]; //Acturaliza posición en X
+	DatosY->nf=DatosC->R[1]+DatosC->C[1]; //Acturaliza posición en Y
+	Two_Axis(DatosX,DatosY,DatosG); //Calculos 
+	Move_XY_Axis(DatosX,DatosY,DatosG); //Movimiento de los dos motores 
+	DatosC->AIncrement=DatosC->AIncrement+DivAngle; //Incrementar el angulo
+	}
+	DatosX->nf=DatosC->Pf[0]; //Coloca la utilima cordenada 
+	DatosY->nf=DatosC->Pf[0]; 
+	Two_Axis(DatosX,DatosY,DatosG);
+	Move_XY_Axis(DatosX,DatosY,DatosG); 
+}
+
+//void CurvePoints(AxisMotor *DatosX, AxisMotor *DatosY, GeneralMotor *DatosG,Curve *DatosC,float DivAngle){
+	//AxisMotor NDatosX=&DatosX; 
+	//AxisMotor NDatosY=&DatosY; 
+	//GeneralMotor NDatosG=&DatosG; 
+	////Calculos de coordenadas
+	//DatosC->RIncrement=DatosC->AIncrement*PI/180; // Incremento en radianes
+	//DatosC->C[0]=((-1*DatosG->I)*cos(DatosC->RIncrement))-((-1*DatosG->J)*sin(DatosC->RIncrement)); //i
+	//DatosC->C[1]=((-1*DatosG->I)*sin(DatosC->RIncrement))+((-1*DatosG->I)*cos(DatosC->RIncrement)); //j
+	//DatosX->nf=DatosC->R[0]+DatosC->C[0];
+	//DatosY->nf=DatosC->R[1]+DatosC->C[1];
+	//DatosC->AIncrement=DatosC->AIncrement+DivAngle; //Incrementar el angulo
+	//Two_Axis(DatosX,DatosY,DatosG); 
+	//Move_XY_Axis(DatosX,DatosY,DatosG); 
+//}
 

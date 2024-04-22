@@ -13,6 +13,8 @@ float GetConfi();
 float GetCordenadaX();
 float GetCordenadaY();
 float GetCordenadaZ();
+float GetCordenadai();
+float GetCordenadaj(); 
 char GetGoHome(); 
 
 
