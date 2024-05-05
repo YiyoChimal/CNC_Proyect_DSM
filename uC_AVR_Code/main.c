@@ -103,26 +103,10 @@ int main(void){
 		}else if(Mg.ComanG==2 || Mg.ComanG==3){
 			if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
 			CurveSet(&Mx,&My,&Mg,&C,DivAngle); 
+			escribeSerial("FinisH");
 			}
 		}
 		
-		//if ((Mx.ni != Mx.nf)&(My.ni != My.nf)){
-			//CurveSet(&Mx,&My,&Mg,&C,DivAngle);
-			////Two_Axis(&Mx,&My,&Mg);
-			////Move_XY_Axis(&Mx,&My,&Mg);
-			////CurveSet(&Mx,&My,&Mg,&C,DivAngle);
-			//escribeFlAChar(C.R[0],4);
-			//saltoLinea();
-			//escribeFlAChar(C.R[1],4);
-			//saltoLinea();
-			//escribeFlAChar(Mx.nf,4);
-			//saltoLinea(); 
-			//escribeFlAChar(My.nf,4);
-			//saltoLinea(); 
-			//Mx.ni=Mx.nf;
-			//My.ni=My.nf; 
-			//
-		//}
     }
 }
 
